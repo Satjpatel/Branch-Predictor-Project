@@ -12,8 +12,8 @@
 #include "branch.h"
 #include "trace.h"
 #include "predictor.h"
-//#include "my_predictor.h"
-#include "tage.h"
+#include "my_predictor.h"
+
 extern long long int trace_instructions, trace_branches;
 extern double instructions_per_branch;
 

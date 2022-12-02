@@ -2,9 +2,6 @@
 #include <time.h>
 #include <bitset>
 
-#include "tage.h"
-#include "twobcghsare.h"
-
 #define BIMODAL_CTR_MAX  3
 #define BIMODAL_CTR_INIT 2
 #define TAGPRED_CTR_MAX  7
