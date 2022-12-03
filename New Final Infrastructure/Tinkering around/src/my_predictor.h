@@ -1,10 +1,10 @@
 #include <cstdlib>
 #include <time.h>
 #include <bitset>
-// #include <iostream> 
-// #include <fstream> 
-// #include <string.h>
-// using namespace std ; 
+#include <iostream> 
+#include <fstream> 
+#include <string.h>
+using namespace std ; 
 
 #define BIMODAL_CTR_MAX  3
 #define BIMODAL_CTR_INIT 2
@@ -32,23 +32,25 @@ struct TagEntry
 };
 
 //Gathering data to give input in NN
-// struct DataForNN
-// {
-// 	int PC_Value;
-// 	int HistoryNminus1;
-//     bool HistoryNminus2;
-// 	bool TAGE_ActualPrediction;
-// 	bool TAGE_MyPrediction;
-// };
+struct DataForNN
+{
+//	int PC_Value;
+	int HistoryNminus1;
+//  bool HistoryNminus2;
+	bool TAGE_ActualPrediction;
+	bool TAGE_MyPrediction;
+};
 
-
-// void CSV_input(DataForNN d) 
-// {   
-//     ofstream p ; 
-//     p.open("test.csv", std::ios_base::app) ; 
-// 	p<<d.PC_Value <<","<<d.HistoryNminus1<<","<<d.HistoryNminus2<<"," <<d.TAGE_MyPrediction<<","<<d.TAGE_ActualPrediction<<endl; 
-//     p.close() ; 
-// }
+DataForNN nn_data ; 
+// Function to write into CSV file
+void CSV_input(DataForNN d) 
+{   
+    ofstream p ; 
+    p.open("test.csv", std::ios_base::app) ; 
+	//p<<d.PC_Value <<","<<d.HistoryNminus1<<","<<d.HistoryNminus2<<"," <<d.TAGE_MyPrediction<<","<<d.TAGE_ActualPrediction<<endl; 
+	p<<d.TAGE_MyPrediction<<","<<d.TAGE_ActualPrediction<<","<<d.HistoryNminus1<<endl; 
+    p.close() ; 
+}
 
 // Folded History implementation ... from ghr (geometric length) -> compressed(target)
 struct CompressedHist
@@ -297,6 +299,7 @@ public:
 		   {
 			   if(tagPred[altBank][indexTagPred[altBank]].ctr >= TAGPRED_CTR_MAX/2)
 				    altPred = TAKEN;
+
 				else 
 				    altPred = NOT_TAKEN;
 		   }
@@ -308,11 +311,14 @@ public:
 				else 
 				    primePred = NOT_TAKEN;
 				u.direction_prediction(primePred);
+				
+				nn_data.HistoryNminus1 = tagPred[primeBank][indexTagPred[primeBank]].ctr ; 
 				return &u;
 			}
 			else
 			{
 				u.direction_prediction(altPred);
+				nn_data.HistoryNminus1 = tagPred[altBank][indexTagPred[altBank]].ctr ; 
 				return &u;
 			}
 		}
@@ -320,8 +326,10 @@ public:
 		{
 			altPred = basePrediction;
 			u.direction_prediction(altPred);
+			nn_data.HistoryNminus1 = bimodalCounter ; 
 			return &u;
 		}
+		nn_data.HistoryNminus1 = bimodalCounter ; 
 		return &u;
 	}
 
@@ -333,14 +341,14 @@ public:
 		
 		bool predDir = u->direction_prediction();
 		// --------------- Getting Data --------------------------------//
-	// 	DataForNN nn_data ; 
-	// 	nn_data.PC_Value = PC ; // PC Value Done ----------------------------------------------------
-	// 	nn_data.TAGE_MyPrediction = u->direction_prediction() ; // My Prediction value gotten ---------------------------------
-	// 	nn_data.TAGE_ActualPrediction = resolveDir ; //Actual Prediction ----------------------------
-	// 	nn_data.HistoryNminus1 = tagPred[altBank][indexTagPred[altBank]].ctr ; // History Bits ---------------
-	// 	// ----------------------------- New Code Added ----------------------------------// 
-	// //	CSV_input(nn_data) ; 
-
+		
+	//	nn_data.PC_Value = PC ; // PC Value Done ----------------------------------------------------
+		nn_data.TAGE_MyPrediction = predDir ; // My Prediction value gotten ---------------------------------
+		nn_data.TAGE_ActualPrediction = resolveDir ; //Actual Prediction ----------------------------
+		
+		// ----------------------------- New Code Added ----------------------------------// 
+		CSV_input(nn_data) ; 
+		nn_data = { 0, 0 , 0} ; 
 		bool strong_old_present = false;
 		bool new_entry = 0;    
 		if (primeBank < NUMTAGTABLES)
