@@ -1,6 +1,10 @@
 #include <cstdlib>
 #include <time.h>
 #include <bitset>
+// #include <iostream> 
+// #include <fstream> 
+// #include <string.h>
+// using namespace std ; 
 
 #define BIMODAL_CTR_MAX  3
 #define BIMODAL_CTR_INIT 2
@@ -26,6 +30,25 @@ struct TagEntry
     unsigned int tag;
     int usefulBits;
 };
+
+//Gathering data to give input in NN
+// struct DataForNN
+// {
+// 	int PC_Value;
+// 	int HistoryNminus1;
+//     bool HistoryNminus2;
+// 	bool TAGE_ActualPrediction;
+// 	bool TAGE_MyPrediction;
+// };
+
+
+// void CSV_input(DataForNN d) 
+// {   
+//     ofstream p ; 
+//     p.open("test.csv", std::ios_base::app) ; 
+// 	p<<d.PC_Value <<","<<d.HistoryNminus1<<","<<d.HistoryNminus2<<"," <<d.TAGE_MyPrediction<<","<<d.TAGE_ActualPrediction<<endl; 
+//     p.close() ; 
+// }
 
 // Folded History implementation ... from ghr (geometric length) -> compressed(target)
 struct CompressedHist
@@ -84,15 +107,17 @@ public:
 	 unsigned int numTagPredEntries;
 	 unsigned int tagPredLog;
 	 unsigned int geometric[NUMTAGTABLES];
+
 	 //Compressed Buffers
 	 CompressedHist indexComp[NUMTAGTABLES];
 	 CompressedHist tagComp[2][NUMTAGTABLES]; 
 	 
-	 // Predictions need to be global ?? recheck
+	 
 	 bool primePred;
 	 bool altPred;
 	 int primeBank;
 	 int altBank;
+
 	 // index had to be made global else recalculate for update
 	 unsigned int indexTagPred[NUMTAGTABLES];
 	 unsigned int tag[NUMTAGTABLES];
@@ -239,7 +264,7 @@ public:
 		   altBank = NUMTAGTABLES;
 		   
 		   /// See if any tag matches
-		   // T0 with longest history so if hit that awesome
+		   // T0 with longest history so if hit that is awesome
 			
 		   for(int iterator = 0; iterator < NUMTAGTABLES; iterator++)
 		   {
@@ -301,9 +326,21 @@ public:
 	}
 
 	void update (branch_update *u, bool resolveDir, unsigned int branchTarget) {
+
+				
+
 		unsigned int PC = ((my_update*)u)->bi.address;
-		bool predDir = u->direction_prediction();
 		
+		bool predDir = u->direction_prediction();
+		// --------------- Getting Data --------------------------------//
+	// 	DataForNN nn_data ; 
+	// 	nn_data.PC_Value = PC ; // PC Value Done ----------------------------------------------------
+	// 	nn_data.TAGE_MyPrediction = u->direction_prediction() ; // My Prediction value gotten ---------------------------------
+	// 	nn_data.TAGE_ActualPrediction = resolveDir ; //Actual Prediction ----------------------------
+	// 	nn_data.HistoryNminus1 = tagPred[altBank][indexTagPred[altBank]].ctr ; // History Bits ---------------
+	// 	// ----------------------------- New Code Added ----------------------------------// 
+	// //	CSV_input(nn_data) ; 
+
 		bool strong_old_present = false;
 		bool new_entry = 0;    
 		if (primeBank < NUMTAGTABLES)

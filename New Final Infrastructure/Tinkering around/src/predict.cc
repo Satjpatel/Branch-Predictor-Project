@@ -12,10 +12,11 @@
 #include "branch.h"
 #include "trace.h"
 #include "predictor.h"
-#include "my_predictor.h"
 
 extern long long int trace_instructions, trace_branches;
 extern double instructions_per_branch;
+
+#include "my_predictor.h" 
 
 void print_stats (long long int dmiss, long long int tmiss) {
 	printf ("%lld instructions; %0.3f IPB; %0.3f direction MPKI; %0.3f indirect MPKI\n", trace_instructions, instructions_per_branch, 1000.0 * (dmiss / (double) trace_instructions), 1000.0 * (tmiss / (double) trace_instructions));
@@ -89,6 +90,8 @@ int main (int argc, char *argv[]) {
 			print_stats (dmiss, tmiss);
 			last_instructions = trace_instructions;
 		}
+
+
 	}
 
 	// done reading traces
