@@ -35,7 +35,7 @@ struct TagEntry
 struct DataForNN
 {
 //	int PC_Value;
-	int HistoryNminus1;
+	int History;
 //  bool HistoryNminus2;
 	bool TAGE_ActualPrediction;
 	bool TAGE_MyPrediction;
@@ -46,9 +46,9 @@ DataForNN nn_data ;
 void CSV_input(DataForNN d) 
 {   
     ofstream p ; 
-    p.open("test.csv", std::ios_base::app) ; 
+    p.open("gzip.csv", std::ios_base::app) ; 
 	//p<<d.PC_Value <<","<<d.HistoryNminus1<<","<<d.HistoryNminus2<<"," <<d.TAGE_MyPrediction<<","<<d.TAGE_ActualPrediction<<endl; 
-	p<<d.TAGE_MyPrediction<<","<<d.TAGE_ActualPrediction<<","<<d.HistoryNminus1<<endl; 
+	p<<d.TAGE_MyPrediction<<","<<d.TAGE_ActualPrediction<<","<<d.History<<endl; 
     p.close() ; 
 }
 
@@ -312,13 +312,13 @@ public:
 				    primePred = NOT_TAKEN;
 				u.direction_prediction(primePred);
 				
-				nn_data.HistoryNminus1 = tagPred[primeBank][indexTagPred[primeBank]].ctr ; 
+				nn_data.History = ((tagPred[primeBank][indexTagPred[primeBank]].ctr)%4) + 1 ; 
 				return &u;
 			}
 			else
 			{
 				u.direction_prediction(altPred);
-				nn_data.HistoryNminus1 = tagPred[altBank][indexTagPred[altBank]].ctr ; 
+				nn_data.History = ((tagPred[altBank][indexTagPred[altBank]].ctr)%4) + 1 ; 
 				return &u;
 			}
 		}
@@ -326,10 +326,10 @@ public:
 		{
 			altPred = basePrediction;
 			u.direction_prediction(altPred);
-			nn_data.HistoryNminus1 = bimodalCounter ; 
+			nn_data.History = (bimodalCounter%4) + 1 ; 
 			return &u;
 		}
-		nn_data.HistoryNminus1 = bimodalCounter ; 
+		nn_data.History = (bimodalCounter%4) + 1 ; 
 		return &u;
 	}
 
@@ -348,6 +348,7 @@ public:
 		
 		// ----------------------------- New Code Added ----------------------------------// 
 		CSV_input(nn_data) ; 
+		// Resetting the values
 		nn_data = { 0, 0 , 0} ; 
 		bool strong_old_present = false;
 		bool new_entry = 0;    
