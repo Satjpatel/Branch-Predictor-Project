@@ -15,7 +15,7 @@ class my_TwoBCGShare_P2 {
 public: // Make sure everything you do is in public directory
     // You can add whatever parameters you want in these functions. 
     void TwoBCGShare_Init(); 
-
+    //Your function -- Testing from MAC! 
 
     bool TwoBCGShare_Predict();
     
