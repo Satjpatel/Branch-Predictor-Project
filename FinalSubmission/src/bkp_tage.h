@@ -346,7 +346,7 @@ public:
 		bool predDir = u->direction_prediction();
 		// --------------- Getting Data --------------------------------//
 		
-	//	nn_data.PC_Value = PC ; // PC Value Done ----------------------------------------------------
+		//	nn_data.PC_Value = PC ; // PC Value Done ----------------------------------------------------
 		nn_data.TAGE_MyPrediction = predDir ; // My Prediction value gotten ---------------------------------
 		nn_data.TAGE_ActualPrediction = resolveDir ; //Actual Prediction ----------------------------
 		
@@ -567,5 +567,8 @@ public:
 		}
 		PHR = (PHR & ((1 << 16) - 1));
 	}
+
+
+
 };
    
