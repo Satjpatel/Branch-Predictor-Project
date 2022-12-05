@@ -1,10 +1,11 @@
-// my_predictor.h
-// This file contains a sample my_predictor class.
-// It has a simple 32,768-entry gshare with a history length of 15 and a
-// simple direct-mapped branch target buffer for indirect branch prediction.
+// credit to: https://github.com/USTLogiCal/cse240-predictor/blob/master/predictor.C
+
+#include <iostream>
+#include <fstream> 
+using namespace std ;
+
 #define gs_PHT_SIZE 8192	//2^13
 #define gs_PHT_MASK	0x1FFF  //13 bit address mask
-
 
 //bimodal
 #define bi_PHT_SIZE	4096 	//2^12
@@ -13,7 +14,6 @@
 //choice
 #define choice_SIZE	4096
 #define choice_MASK	0xFFF	
-//bool gsPredict = false;
 
 
 class my_update : public branch_update {
@@ -37,8 +37,6 @@ public:
 	int CHOICE[choice_SIZE];
 	bool gsPredict = false;			//prediction from gShare
 
-
-
 	my_predictor (void){ 
 		//all values initiated to 0
 		//init gShare
@@ -61,47 +59,72 @@ public:
 		unsigned int pc = b.address;
 		//gShare
 		gs_index = gs_HISTORY ^ (pc & gs_PHT_MASK);
+		//cout << gs_PHT[gs_index] << "  ";
+		
 		if(gs_PHT[gs_index] > 1)		//for values 10 and 11 return true
 			gsPredict = true;
 
 		//biModal
 		bi_index = pc & bi_PHT_MASK;
+		//cout << bi_PHT[bi_index] << "  ";
 		if(bi_PHT[bi_index] > 1)		//for values 10 and 11 return true
 			biPredict = true;
 
+		//cout<< "Bi: " <<biPredict;
+		//cout<< "Gs: " <<gsPredict;
 		//CHOICE
-		if(CHOICE[gs_HISTORY & choice_MASK] > 1)
+		if(CHOICE[gs_HISTORY & choice_MASK] > 1){
+			//std::cout<< "GS: "<< gsPredict;
 			u.direction_prediction(gsPredict);
-		else
+		}
+		else{
+			//std::cout<< "Bi: " <<biPredict;
 			u.direction_prediction(biPredict);
+		}
 		return &u;
 	
 	}
 	void update (branch_update *u, bool taken, unsigned int target) {
 		//u.bi = b;
 		unsigned int pc = ((my_update*)u)->bi.address;
-		int outcome = target;
+		bool predDir = u->direction_prediction();
+		bool outcome = (taken == predDir);
+		bool outcomeB = (biPredict==taken);
+		bool outcomeG = (gsPredict==taken);
+		//cout << outcome;
+
+
+	
 		//train gShare
-		//if(outcome == true && gs_PHT[gs_index] < 3)		//saturate towards T 
-		if(outcome == true && gs_PHT[gs_index] < 3)
+		if(outcome == true && gs_PHT[gs_index] < 3){	//saturate towards T 
+		//if(outcomeG == true && gs_PHT[gs_index] < 3){
 			gs_PHT[gs_index]++;
-		if(outcome == false && gs_PHT[gs_index] > 0)	//saturate towards NT
+			//cout <<" g+ ";
+		}
+		if(outcome == false && gs_PHT[gs_index] > 0){	//saturate towards NT
 			gs_PHT[gs_index]--;
+			//cout <<" g- ";
+		}
 
 		//train biModal
-		if(outcome == true && bi_PHT[bi_index] < 3)		//saturate towards T
+		if(outcome == true && bi_PHT[bi_index] < 3){		//saturate towards T
 			bi_PHT[bi_index]++;
-		if(outcome == false && bi_PHT[bi_index] > 0)	//saturate towards NT
+			//cout <<" b+ ";
+		}
+		if(outcome == false && bi_PHT[bi_index] > 0){	//saturate towards NT
 			bi_PHT[bi_index]--;
+			//cout <<" b- ";
+		}
 
 
 		//Train CHOICE only when the two predictors differ
 		if(biPredict != gsPredict){
-			if(gsPredict == outcome && CHOICE[gs_HISTORY & choice_MASK] < 3){
+			if(outcomeG == true && CHOICE[gs_HISTORY & choice_MASK] < 3){
+			//if(outcome == true && CHOICE[gs_HISTORY & choice_MASK] < 3){
 				//train chooser to choose GLOBAL
 				CHOICE[gs_HISTORY & choice_MASK]++;
 			} 
-			else if(biPredict == outcome && CHOICE[gs_HISTORY & choice_MASK] > 0){
+			else if(outcomeB == true && CHOICE[gs_HISTORY & choice_MASK] > 0){
 				//train chooser to choose LOCAL
 				CHOICE[gs_HISTORY & choice_MASK]--;
 			}
@@ -111,6 +134,7 @@ public:
 		gs_HISTORY = gs_HISTORY << 1;
 		gs_HISTORY = gs_HISTORY | int(outcome);
 		gs_HISTORY = gs_HISTORY & gs_PHT_MASK;
+		
 	}
 
 };
