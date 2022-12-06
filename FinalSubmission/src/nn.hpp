@@ -254,7 +254,7 @@ class NeuralNetwork {
             layers.emplace_back(neural_network::layers::DenseLayer(
                 config[i].first, config[i].second, kernels[i]));
         }
-        std::cout << "INFO: Network constructed successfully" << std::endl;
+//        std::cout << "INFO: Network constructed successfully" << std::endl;
     }
     /**
      * Private function to get detailed predictions (i.e.
@@ -693,7 +693,7 @@ class NeuralNetwork {
                 out_file << std::endl;
             }
         }
-        std::cout << "INFO: Model saved successfully with name : ";
+//        std::cout << "INFO: Model saved successfully with name : ";
         std::cout << file_name << std::endl;
         out_file.close();  // Closing file
         return;
@@ -736,7 +736,7 @@ class NeuralNetwork {
             ;
             kernels.emplace_back(kernel);
         }
-        std::cout << "INFO: Model loaded successfully" << std::endl;
+//        std::cout << "INFO: Model loaded successfully" << std::endl;
         in_file.close();  // Closing file
         return NeuralNetwork(
             config, kernels);  // Return instance of NeuralNetwork class

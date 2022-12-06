@@ -4,6 +4,9 @@
 #include <cstdlib>
 #include <time.h>
 #include <bitset>
+#include <vector>
+// #include "my_predictor.h" 
+
 
 // Constants being used here
 #define BIMODAL_CTR_MAX  3
@@ -16,6 +19,12 @@
 #define TAKEN 1
 #define NOT_TAKEN 0
 
+bool myTAGEPred ; 
+bool HistoryMinus1 ; 
+bool HistoryMinus2 ; 
+int tempHistory ; 
+
+extern bool TAGE_NN [3] = {myTAGEPred, HistoryMinus1, HistoryMinus2 } ; 
 // Structures used here
 /* 
     TagEntry --> Each element in the prediction table
@@ -57,6 +66,29 @@ struct CompressedHist
     SatDecrement() --> Saturation Counter Decrementer     
 */
 
+void Dec2Bin (int History, bool Hminus1, bool Hminus2) 
+{ 
+	switch(History){ 
+		case '0': Hminus1 = 0 ; 
+				  Hminus2 = 0 ; 
+				  break ; 
+		case '1': Hminus1 = 1 ; 
+				  Hminus2 = 0 ;  
+				  break ; 
+		case '2': Hminus1 = 0 ; 
+				  Hminus2 = 1 ; 
+				  break ; 
+		case '3': Hminus1 = 1 ; 
+				  Hminus2 = 1 ;
+				  break ; 
+		default: Hminus1 = 0 ; 
+				Hminus2 = 0 ; 
+				break ; 
+
+				  
+	}
+}
+
 int SatIncrement(int state, int max){
 	if (state<max && state >=0){
 	    state = state +1;
@@ -93,9 +125,10 @@ public:
 	
 
     // insfrastructure data types
-	my_update u;
-	branch_info bi;
+	//my_update u;
+	//branch_info bi;
 	
+	bool finalpredictTAGE ; 
 	// Variable declarations
 	 std::bitset<131> GHR;           // global history register
 	 // 16 bit path history
@@ -213,10 +246,12 @@ public:
 	// --------- End of Initializing Function
 
 	// ------------ Predict Function 
-	bool TAGE_Predict(branch_info & b) 
+	bool TAGE_Predict(uint32_t pc) 
 	{
-		u.bi = b;
-		unsigned int PC = b.address;
+		//printf("I am in TAGEGetpredict\n");
+		// u.bi = b;
+		// unsigned int PC = b.address;
+		uint32_t PC =pc;
 		bool basePrediction;
 	  unsigned int bimodalIndex   = (PC) % (numBimodalEntries);
 	  unsigned int bimodalCounter = bimodal[bimodalIndex];
@@ -310,22 +345,40 @@ public:
 				    primePred = TAKEN;
 				else 
 				    primePred = NOT_TAKEN;
-				u.direction_prediction(primePred);
-				return &u;
+
+				//u.direction_prediction(primePred);
+				finalpredictTAGE = primePred ; 
+				tempHistory = ((tagPred[primeBank][indexTagPred[primeBank]].ctr)%4) ; 
+				Dec2Bin(tempHistory, HistoryMinus1, HistoryMinus2) ; 
+				return finalpredictTAGE ;
+				//return &u;
 			}
 			else
 			{
-				u.direction_prediction(altPred);
-				return &u;
+				//u.direction_prediction(altPred);
+				finalpredictTAGE = altPred ; 
+				tempHistory = ((tagPred[altBank][indexTagPred[altBank]].ctr)%4) ; 
+				Dec2Bin(tempHistory, HistoryMinus1, HistoryMinus2) ; 
+				return finalpredictTAGE ; 
+				//return &u;
 			}
 		}
 		else
 		{
 			altPred = basePrediction;
-			u.direction_prediction(altPred);
-			return &u;
+			//u.direction_prediction(altPred);
+			finalpredictTAGE = altPred ; 
+			tempHistory = (bimodalCounter%4) ; 
+			Dec2Bin(tempHistory, HistoryMinus1, HistoryMinus2) ; 
+			return finalpredictTAGE ; 
+			//return &u;
 		}
-		return &u;
+		tempHistory = (bimodalCounter%4) ; 
+		Dec2Bin(tempHistory, HistoryMinus1, HistoryMinus2) ; 
+		finalpredictTAGE = altPred ; 
+		return finalpredictTAGE ; 
+
+		//return &u;
 	}
 
 
@@ -335,23 +388,24 @@ public:
 	// ---------- End of Predict Function 
 
 	// ------------------- Update Function 
-	void TAGE_Update(branch_update *u, bool resolveDir, unsigned int branchTarget) {
+	void TAGE_Update(uint32_t pc, branch_update *u, bool resolveDir, unsigned int branchTarget) {
 
 				
 
-		unsigned int PC = ((my_update*)u)->bi.address;
+		uint32_t PC = pc;
 		
 		bool predDir = u->direction_prediction();
+		myTAGEPred = predDir ; // Getting the Prediction here
 		// --------------- Getting Data --------------------------------//
 		
 		//	nn_data.PC_Value = PC ; // PC Value Done ----------------------------------------------------
-		nn_data.TAGE_MyPrediction = predDir ; // My Prediction value gotten ---------------------------------
-		nn_data.TAGE_ActualPrediction = resolveDir ; //Actual Prediction ----------------------------
+	//	nn_data.TAGE_MyPrediction = predDir ; // My Prediction value gotten ---------------------------------
+	//	nn_data.TAGE_ActualPrediction = resolveDir ; //Actual Prediction ----------------------------
 		
 		// ----------------------------- New Code Added ----------------------------------// 
-		CSV_input(nn_data) ; 
+	//	CSV_input(nn_data) ; 
 		// Resetting the values
-		nn_data = { 0, 0 , 0} ; 
+	//	nn_data = { 0, 0 , 0} ; 
 		// Please reset it to zero
 
 

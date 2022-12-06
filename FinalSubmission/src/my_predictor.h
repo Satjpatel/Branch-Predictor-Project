@@ -21,7 +21,10 @@ public:
 		uint32_t PC = bi.address;
 
 		if (b.br_flags & BR_CONDITIONAL) {
+			//	printf("I am in predict\n");
 		    pred_taken = mypred->GetPrediction(PC);
+		//
+		//	printf("I am in predict pred_taken =%d\n",pred_taken);
 
         }
 		 u.direction_prediction (pred_taken); // We get the final prediction here
@@ -31,9 +34,9 @@ public:
 
 	void update (branch_update *u, bool taken, unsigned int target) {
 
-
+		uint32_t pc = bi.address;
 		if (bi.br_flags & BR_CONDITIONAL) {
-			mypred->GetUpdate(u, taken, target); // We get the updating information here
+			mypred->GetUpdate(pc, u, u->direction_prediction() , u->target_prediction()); // We get the updating information here
 	}
     }
 };
