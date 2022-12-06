@@ -21,7 +21,7 @@ double relu (double input)
 }
 
 // The first layer -- Layer 1 finally fucking done!
-void firstlayerNN (int inputlayer [2], double outputlayer [3]) 
+void firstlayerNN (bool inputlayer [2], double outputlayer [3]) 
 { 
      //Defining the associated weights 
      double weights [2][3] = { {0.25, -0.2, 0.66},
@@ -57,20 +57,22 @@ void secondlayerNN (double secondlayer [3], double outputlayer [2])
 
 // } 
 
-int main() 
-{  int layer1[2] = {0,1} ; 
-   double weigths [2][3] = { {3, -0.5, 2.0}, 
-                                    {3, -0.5, 2.0},} ; 
-    cout<<weigths[1][1]<<endl<<weigths[1][0]<<endl ; 
+bool NN_output(bool layer1[2]) 
+{ // int layer1[2] = {0,1} ; 
+   //double weigths [2][3] = { {3, -0.5, 2.0}, 
+                                //    {3, -0.5, 2.0},} ; 
+    //cout<<weigths[1][1]<<endl<<weigths[1][0]<<endl ; 
     
     double outputlayer [3] = {0.0, 0.0,0.0} ; 
     firstlayerNN(layer1, outputlayer) ; 
-    cout<<outputlayer[0]<<" "<<outputlayer[1]<<" "<<outputlayer[2]<<" "<<endl ; 
+   // cout<<outputlayer[0]<<" "<<outputlayer[1]<<" "<<outputlayer[2]<<" "<<endl ; 
     double outputlayer_d [2] = {0, 0} ; 
     secondlayerNN(outputlayer, outputlayer_d) ; 
-    cout<<outputlayer_d[0]<<" "<<outputlayer_d[1]<<endl ; 
+   // cout<<outputlayer_d[0]<<" "<<outputlayer_d[1]<<endl ; 
     cout<<sigmoid(outputlayer_d[0])<<" "<<sigmoid(outputlayer_d[1])<<endl ; 
-        cout<<relu(outputlayer_d[0])<<" "<<relu(outputlayer_d[1])<<endl ; 
-
-    return 0 ; 
+     //   cout<<relu(outputlayer_d[0])<<" "<<relu(outputlayer_d[1])<<endl ; 
+    if(sigmoid(outputlayer_d[0]) > sigmoid(outputlayer_d[1]))
+        return 1 ; 
+    else 
+        return 0 ; 
 }

@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "cassert": "cpp",
+        "ostream": "cpp",
+        "iostream": "cpp"
+    }
+}
