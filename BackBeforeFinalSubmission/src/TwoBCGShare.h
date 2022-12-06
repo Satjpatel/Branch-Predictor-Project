@@ -1,3 +1,4 @@
+// credit to: https://github.com/USTLogiCal/cse240-predictor/blob/master/predictor.C
 //size definitions
 #define gs_PHT_SIZE 8192	//2^13
 #define gs_PHT_MASK	0x1FFF  //13 bit address mask
