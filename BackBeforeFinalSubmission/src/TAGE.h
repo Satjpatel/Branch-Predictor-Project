@@ -1,3 +1,5 @@
+//Credit to: https://github.com/2Bor2C/tage
+//Credit to: https://github.com/rajarshibiswas/Branch-Prediction
 // Code for TAGE Predictor 
 // Including the necessary header files here
 // TAGE Header File
